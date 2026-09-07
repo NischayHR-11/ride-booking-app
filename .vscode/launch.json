@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "RideServiceApplication",
+            "request": "launch",
+            "mainClass": "com.ridebooking.rideservice.RideServiceApplication",
+            "projectName": "olympus-native-app-m02-lu03-nischay",
+            "vmArgs": "-Dspring.profiles.active=local -Dcom.sun.management.jmxremote.port=10001 -Dcom.sun.management.jmxremote.rmi.port=10001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "local"
+            }
+        },
+        {
+            "type": "java",
+            "name": "DriverServiceApplication",
+            "request": "launch",
+            "mainClass": "com.ridebooking.driverservice.DriverServiceApplication",
+            "projectName": "olympus-native-app-m02-lu03-nischay-driver",
+            "vmArgs": "-Dspring.profiles.active=local -Dcom.sun.management.jmxremote.port=10002 -Dcom.sun.management.jmxremote.rmi.port=10002 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "local"
+            }
+        },
+        {
+            "type": "java",
+            "name": "NotificationServiceApplication",
+            "request": "launch",
+            "mainClass": "com.ridebooking.notificationservice.NotificationServiceApplication",
+            "projectName": "olympus-native-app-m02-lu03-nischay-notification",
+            "vmArgs": "-Dspring.profiles.active=local -Dcom.sun.management.jmxremote.port=10003 -Dcom.sun.management.jmxremote.rmi.port=10003 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "local"
+            }
+        }
+    ]
+}

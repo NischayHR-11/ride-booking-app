@@ -1,0 +1,473 @@
+{
+  "info": {
+    "_postman_id": "ride-booking-demo-workflow-cce",
+    "name": "Ride Booking Platform - Interview Demo Workflow (CCE)",
+    "description": "Sequential workflow collection for interview demonstration on CCE infrastructure\n\n📋 WORKFLOW SEQUENCE:\n1. Health Checks (verify all 3 services UP)\n2. Register Rider + Driver\n3. Update Driver Location (near pickup)\n4. Create Ride #1 (Happy Path - Driver Assigned)\n5. View Ride Details (status=ASSIGNED)\n6. Complete Ride #1\n7. Rate Ride\n8. Register 2nd Driver (beyond 5km)\n9. Create Ride #2 (No Driver Available scenario)\n10. View Ride #2 (status=NO_DRIVER_AVAILABLE) ← EVENT CONSUMED\n11. Create Ride #3 (for cancellation demo)\n12. Cancel Ride #3\n13. Try Cancel Again (show state machine guard)\n14. Data Inspection (All Rides, Drivers, Notifications)\n\n🌐 DOMAIN MAPPING:\n• Ride Service: rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in\n• Driver Service: driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in\n• Notification Service: notificationservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in\n\n⚙️ TECH DETAILS:\n• Geospatial Matching: Haversine distance (5km radius)\n• Tie-Breaking: distance → rating → registration time\n• Pricing: Random ₹50–₹500 (simulated 3rd-party integration)\n• Event Bus: Atropos (Kinesis)\n• Webhooks: Auto-triggered for state changes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00. HEALTH CHECKS - Verify All Services UP",
+      "item": [
+        {
+          "name": "01 | Ride Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/actuator/health",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["actuator", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 | Driver Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/actuator/health",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["actuator", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 | Notification Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://notificationservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/actuator/health",
+              "protocol": "https",
+              "host": ["notificationservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["actuator", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01. SETUP - Register Rider & Driver",
+      "item": [
+        {
+          "name": "04 | Register Rider (copy riderId to variable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Frank Turner\",\n  \"phone\": \"9876543206\",\n  \"email\": \"frank@example.com\"\n}"
+            },
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/riders",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "riders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 | Register Driver #1 (copy driverId to variable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"phone\": \"9876543210\",\n  \"vehicleNumber\": \"ABC123XYZ\",\n  \"vehicleType\": \"CAR\"\n}"
+            },
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. SCENARIO 1 SETUP - Position Driver Near Pickup",
+      "item": [
+        {
+          "name": "06 | Update Driver #1 Location (12.96, 77.60 → ~0.5km from pickup)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 12.96,\n  \"longitude\": 77.60\n}"
+            },
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers/{{driverId}}/location",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers", "{{driverId}}", "location"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. SCENARIO 1 - Happy Path (Driver Assigned)",
+      "item": [
+        {
+          "name": "07 | Create Ride #1 (pickupLat=12.97, pickupLng=77.59)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"riderId\": \"{{riderId}}\",\n  \"pickupLocation\": \"Tech Park\",\n  \"dropLocation\": \"Airport Terminal 3\",\n  \"pickupLat\": 12.97,\n  \"pickupLng\": 77.59\n}"
+            },
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 | Get Ride #1 Details (status should be ASSIGNED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 | Complete Ride #1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}/complete",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}", "complete"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 | Rate Ride #1 (5 stars)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"feedback\": \"Excellent service!\"\n}"
+            },
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}/rating",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}", "rating"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. SCENARIO 2 SETUP - Register Driver Beyond 5km",
+      "item": [
+        {
+          "name": "11 | Register Driver #2 (for no-driver scenario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"phone\": \"9876543211\",\n  \"vehicleNumber\": \"XYZ789ABC\",\n  \"vehicleType\": \"BIKE\"\n}"
+            },
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 | Update Driver #2 Location (13.08, 77.59 → ~15km away, BEYOND 5km limit)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 13.08,\n  \"longitude\": 77.59\n}"
+            },
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers/{{driverId}}/location",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers", "{{driverId}}", "location"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13 | Set Driver #1 to Unavailable (so only Driver #2 remains)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"available\": false\n}"
+            },
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers/{{driverId}}/availability",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers", "{{driverId}}", "availability"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05. SCENARIO 2 - No Driver Available",
+      "item": [
+        {
+          "name": "14 | Create Ride #2 (NO DRIVER AVAILABLE - Driver #2 is >5km)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"riderId\": \"{{riderId}}\",\n  \"pickupLocation\": \"Tech Park\",\n  \"dropLocation\": \"Airport Terminal 3\",\n  \"pickupLat\": 12.97,\n  \"pickupLng\": 77.59\n}"
+            },
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15 | Get Ride #2 (status should be NO_DRIVER_AVAILABLE)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. SCENARIO 3 - Cancellation (State Machine Guard)",
+      "item": [
+        {
+          "name": "16 | Create Ride #3 (for cancellation demo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"riderId\": \"{{riderId}}\",\n  \"pickupLocation\": \"Downtown\",\n  \"dropLocation\": \"Railway Station\",\n  \"pickupLat\": 12.97,\n  \"pickupLng\": 77.59\n}"
+            },
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17 | Cancel Ride #3 (should succeed)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}/cancel",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18 | Try Cancel Ride #3 Again (should fail - 400 State Guard)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/{{rideId}}/cancel",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "{{rideId}}", "cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07. DATA INSPECTION - View All Data",
+      "item": [
+        {
+          "name": "19 | Get All Rides (view all statuses: ASSIGNED, NO_DRIVER_AVAILABLE, COMPLETED, CANCELLED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides/all",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "20 | Get All Drivers (view locations, availability, ratings)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers/all",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21 | Get All Notifications (show all 3 event types: DRIVER_ASSIGNED, RIDE_COMPLETED, NO_DRIVER_AVAILABLE)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://notificationservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/notifications",
+              "protocol": "https",
+              "host": ["notificationservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "notifications"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08. BONUS - Advanced Scenarios (Optional)",
+      "item": [
+        {
+          "name": "[OPT-A] View Rides by Rider ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/rides?riderId={{riderId}}",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "rides"],
+              "query": [{ "key": "riderId", "value": "{{riderId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[OPT-B] View Rider Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rideservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/riders/{{riderId}}",
+              "protocol": "https",
+              "host": ["rideservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "riders", "{{riderId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[OPT-C] View Driver Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://driverservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/drivers/{{driverId}}/stats",
+              "protocol": "https",
+              "host": ["driverservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "drivers", "{{driverId}}", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[OPT-D] View User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://notificationservice-cceridebookingnischaynischay131.internal.cce.zetaapps.in/api/notifications/{{userId}}",
+              "protocol": "https",
+              "host": ["notificationservice-cceridebookingnischaynischay131", "internal", "cce", "zetaapps", "in"],
+              "path": ["api", "notifications", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "riderId", "value": "", "type": "string" },
+    { "key": "rideId", "value": "", "type": "string" },
+    { "key": "driverId", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "notificationId", "value": "", "type": "string" }
+  ]
+}
