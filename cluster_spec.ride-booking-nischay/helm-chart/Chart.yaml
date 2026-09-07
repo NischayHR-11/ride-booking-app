@@ -1,0 +1,44 @@
+apiVersion: v2
+name: cluster_spec.ride-booking
+description: Cluster spec helm chart for Ride Booking Platform
+type: application
+version: 0.0.1-SNAPSHOT
+dependencies:
+  - name: common
+    version: 1.0.101
+    repository: '@chartrepo'
+    alias: common
+  - name: reloader
+    repository: '@chartrepo'
+    version: v0.1.2
+    alias: reloader
+    condition: reloader.enabled
+  - name: cleaner
+    version: 1.0.4
+    repository: '@chartrepo'
+    alias: cleaner
+  - name: common-resource-requirement
+    version: 3.1.50
+    repository: '@chartrepo'
+  - name: zea-2026-b02-nischay-ride-booking-ride-service
+    repository: '@chartrepo'
+    version: 1.0-SNAPSHOT
+    alias: zea-2026-b02-nischay-ride-booking-ride-service
+    condition: zea-2026-b02-nischay-ride-booking-ride-service.enabled
+  - name: zea-2026-b02-nischay-ride-booking-driver-service
+    repository: '@chartrepo'
+    version: 1.0-SNAPSHOT
+    alias: zea-2026-b02-nischay-ride-booking-driver-service
+    condition: zea-2026-b02-nischay-ride-booking-driver-service.enabled
+  - name: zea-2026-b02-nischay-ride-booking-notification-service
+    repository: '@chartrepo'
+    version: 1.0-SNAPSHOT
+    alias: zea-2026-b02-nischay-ride-booking-notification-service
+    condition: zea-2026-b02-nischay-ride-booking-notification-service.enabled
+keywords:
+  - ride-booking
+  - microservices
+  - atropos
+maintainers:
+  - name: Nischay HR
+    email: nischayhr@zeta.tech

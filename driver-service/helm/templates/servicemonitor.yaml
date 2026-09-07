@@ -1,0 +1,1 @@
+{{- template "common.servicemonitor-v2" . }}

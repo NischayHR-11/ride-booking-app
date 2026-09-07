@@ -1,0 +1,21 @@
+{
+  "summary" : {
+    "total" : 1,
+    "passed" : 1,
+    "failed" : 0
+  },
+  "prioritySegregation" : {
+    "P0" : "100.00%",
+    "P1" : "0.00%",
+    "P2" : "0.00%",
+    "P3" : "0.00%",
+    "P4" : "0.00%",
+    "P5" : "0.00%"
+  },
+  "testFailuresByPriority" : {
+    "P0" : {
+      "totalCount" : 1,
+      "failureCount" : 0
+    }
+  }
+}

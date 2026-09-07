@@ -1,0 +1,32 @@
+apiVersion: zeta.tech/v1alpha1
+kind: HeraclesClusterRoute
+metadata:
+  name: notification-service-route
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressType:
+    - internal
+  cluster: {{ .Release.Namespace }}
+  domainClass: cluster-ingress
+  paths:
+    - /notification-service/(.*)
+  backend:
+    port: 80
+    service: zea-2026-b02-nischay-ride-booking-notification-service
+  config:
+    upstream-setting:
+      proxy-setting:
+        protocol: http
+        path: /
+        connect_timeout: 60000
+        retries: 3
+        read_timeout: 60000
+        write_timeout: 60000
+      route-setting:
+        methods: "POST,PUT,DELETE,PATCH,GET,OPTIONS"
+        preserve_host: false
+        strip_path: false
+    request-transformer:
+      my-transformer:
+        replace:
+          uri: /$(uri_captures[1])

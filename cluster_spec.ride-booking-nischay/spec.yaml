@@ -1,0 +1,17 @@
+name: cluster_spec.ride-booking
+version: 0.0.1-SNAPSHOT
+type: cluster_spec
+description: Cluster spec for Ride Booking Platform - deploys ride, driver, and notification services with Atropos event infrastructure.
+upgradeAllowedFromVersions: []
+publisherMailingList: ride-booking-platform@zeta.tech
+clusterAdminGuide: <Update cluster admin guide confluence link>
+documentation:
+  url: '<Update Microsite link>'
+  source: https://zeta-tm.atlassian.net/wiki/spaces/RBP/overview
+issueTrackers:
+  - type: jira
+    purpose: bug
+    url: https://zeta-saas.atlassian.net/jira/software/c/projects/RBP/boards/1
+publisherContacts:
+  - name: Nischay HR
+    email: nischayhr@zeta.tech

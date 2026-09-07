@@ -1,0 +1,10 @@
+zoneValues:
+  - ganymede-module.yaml
+  - atropos-module.yaml
+  - ride-service.yaml
+  - driver-service.yaml
+  - notification-service.yaml
+mocks:
+  enabled: true
+  mockgroups:
+    - name: default

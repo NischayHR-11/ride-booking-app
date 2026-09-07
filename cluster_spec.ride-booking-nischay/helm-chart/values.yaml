@@ -1,0 +1,68 @@
+global:
+  clusterName: ride-booking
+  clusterVersion: 0.0.1
+  moduleLabels:
+    module: ride-booking
+    version: 0.0.1
+
+# Adding dummy tenant specific resource requirement. Without this the FANG day-1 step fails in CCE automation.
+resourceRequirements:
+  tenant:
+    atroposTopics:
+      ride-booking-topic:
+        syncPriority: "-20"
+        name: _tenant_<%= tcm.tenantId %>_RideBookingTopic
+        retentionPeriodInDays: 1
+
+cleaner:
+  enabled: true
+  image:
+    tag: 1.0.0
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1500Mi
+    requests:
+      cpu: 500m
+      memory: 750Mi
+
+reloader:
+  enabled: true
+  image:
+    tag: v1.0.103
+
+podSecurityContext: {}
+
+securityContext: {}
+
+volumes: {}
+
+zea-2026-b02-nischay-ride-booking-ride-service:
+  enabled: true
+  image:
+    repository: 813361731051.dkr.ecr.ap-south-1.amazonaws.com
+    repositoryPath: zea-2026-b02-nischay-ride-booking-ride-service
+    tag: snapshot_1-0-SNAPSHOT_feature_0a8a04b
+    pullPolicy: Always
+  service:
+    targetPort: 8080
+
+zea-2026-b02-nischay-ride-booking-driver-service:
+  enabled: true
+  image:
+    repository: 813361731051.dkr.ecr.ap-south-1.amazonaws.com
+    repositoryPath: zea-2026-b02-nischay-ride-booking-driver-service
+    tag: snapshot_1-0-SNAPSHOT_feature_b3d761b
+    pullPolicy: Always
+  service:
+    targetPort: 8080
+    
+zea-2026-b02-nischay-ride-booking-notification-service:
+  enabled: true
+  image:
+    repository: 813361731051.dkr.ecr.ap-south-1.amazonaws.com
+    repositoryPath: zea-2026-b02-nischay-ride-booking-notification-service
+    tag: snapshot_1-0-SNAPSHOT_feature_276cb4d
+    pullPolicy: Always
+  service:
+    targetPort: 8080 

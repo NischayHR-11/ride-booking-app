@@ -1,0 +1,15 @@
+@Library("ci@master") _
+
+MavenDockerPublish(
+    'tenant': 'omega',
+    'pipelineTimeout': '19',
+    'enableCodeSonarSastScan': true,
+    'enableCodeSonarSastGating': false,
+    'codeSonarScanCommand': "mvn sonar:sonar -Dsonar.projectKey=driver-service -Dsonar.projectName=\"driver-service\" -Dsonar.branch.name=${params.gitBranch ?: 'master'}",
+    'mavenBuildCommand': 'mvn clean package',
+    'mavenDeployCommand': 'mvn clean deploy',
+    'disableImagePublish': false,
+    'jdkVersion': '17',
+    'publishHelmChart': true,
+    'publishDdlArtifacts': true
+)

@@ -1,0 +1,161 @@
+global:
+  clusterName: {{ .Release.Namespace }}
+  clusterVersion: 0.0.1
+  moduleLabels:
+    module: {{ .Release.Namespace }}
+    version: 0.0.1
+
+resourceRequirements:
+  god:
+    atroposTopics:
+      ride-requested-topic:
+        syncPriority: "-20"
+        name: _system_0_ride-requested
+        retentionPeriodInDays: 7
+
+      driver-assigned-topic:
+        syncPriority: "-20"
+        name: _system_0_driver-assigned
+        retentionPeriodInDays: 7
+
+      no-driver-available-topic:
+        syncPriority: "-20"
+        name: _system_0_no-driver-available
+        retentionPeriodInDays: 7
+
+      ride-cancelled-topic:
+        syncPriority: "-20"
+        name: _system_0_ride-cancelled
+        retentionPeriodInDays: 7
+
+      ride-completed-topic:
+        syncPriority: "-20"
+        name: _system_0_ride-completed
+        retentionPeriodInDays: 7
+
+    atroposSubscriptions:
+      # Driver service consumes RIDE_REQUESTED
+      ride-requested-to-driver-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_ride-requested
+        subscriber: zea-2026-b02-nischay-ride-booking-driver-service
+        topic: _system_0_ride-requested
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://driverservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/drivers/events/ride-requested/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }
+
+      # Ride service consumes NO_DRIVER_AVAILABLE
+      no-driver-available-to-ride-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_no_driver_available
+        subscriber: zea-2026-b02-nischay-ride-booking-ride-service
+        topic: _system_0_no-driver-available
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://rideservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/rides/events/no-driver-available/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }
+
+      # Ride service consumes DRIVER_ASSIGNED
+      driver-assigned-to-ride-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_driver_assigned_ride
+        subscriber: zea-2026-b02-nischay-ride-booking-ride-service
+        topic: _system_0_driver-assigned
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://rideservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/rides/events/driver-assigned/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }
+
+      # Notification service consumes DRIVER_ASSIGNED
+      driver-assigned-to-notification-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_driver_assigned
+        subscriber: zea-2026-b02-nischay-ride-booking-notification-service
+        topic: _system_0_driver-assigned
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://notificationservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/notifications/events/driver-assigned/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }
+
+      # Notification service consumes RIDE_CANCELLED
+      ride-cancelled-to-notification-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_ride_cancelled
+        subscriber: zea-2026-b02-nischay-ride-booking-notification-service
+        topic: _system_0_ride-cancelled
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://notificationservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/notifications/events/ride-cancelled/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }
+
+      # Notification service consumes RIDE_COMPLETED
+      ride-completed-to-notification-service:
+        syncPriority: "-19"
+        subscriptionType: webhook
+        subscriptionID: subscription_0_ride_completed
+        subscriber: zea-2026-b02-nischay-ride-booking-notification-service
+        topic: _system_0_ride-completed
+        transformerJS: |-
+          function transform(payload, sender) {
+              return JSON.stringify(payload.data);
+          }
+        webhookRequest: |-
+          {
+            "method": "POST",
+            "url": "https://notificationservice-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in/api/notifications/events/ride-completed/webhook",
+            "postData": {
+              "mimeType": "application/json",
+              "text": "<% print(generateRequestBody(payload.data)); %>"
+            }
+          }

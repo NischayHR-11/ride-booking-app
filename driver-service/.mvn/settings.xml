@@ -1,0 +1,39 @@
+<settings>
+    <servers>
+        <server>
+            <id>releases</id>
+            <username>${env.MAVEN_REPO_USERNAME}</username>
+            <password>${env.MAVEN_REPO_PASSWORD}</password>
+        </server>
+    </servers>
+
+    <profiles>
+        <profile>
+            <id>zeta</id>
+            <repositories>
+                <repository>
+                    <id>releases</id>
+                    <name>zeta-libs-release</name>
+                    <url>https://artifactory.internal.ciaas.zetaapps.in/artifactory/zeta-libs-release</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>releases</id>
+                    <name>zeta-libs-release</name>
+                    <url>https://artifactory.internal.ciaas.zetaapps.in/artifactory/zeta-libs-release</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>zeta</activeProfile>
+    </activeProfiles>
+</settings>

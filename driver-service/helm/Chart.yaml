@@ -1,0 +1,10 @@
+apiVersion: v2
+name: zea-2026-b02-nischay-ride-booking-driver-service
+description: Helm chart for Driver Service
+type: application
+version: 0.0.1-SNAPSHOT
+appVersion: "0.0.1"
+dependencies:
+  - name: common
+    version: 1.0.101
+    repository: '@chartrepo'

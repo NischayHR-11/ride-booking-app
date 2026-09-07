@@ -1,0 +1,19 @@
+zea-2026-b02-nischay-ride-booking-ride-service:
+  enabled: true
+  envProperties:
+    CLUSTER_NAME: {{ .Release.Namespace }}
+    ENVIRONMENT: dev
+    LOGGING_PIPELINE: KINESIS_AND_SOUT
+    METRIC_LOG_FORMAT: JSON
+    server.port: 8080
+    atropos.publish.mode: 'KINESIS'
+
+
+    # Inter-service communication
+    driver.service.url: https://zea-2026-b02-nischay-ride-booking-driver-service-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in
+    notification.service.url: https://zea-2026-b02-nischay-ride-booking-notification-service-{{ .Release.Namespace.Stripped }}.internal.cce.zetaapps.in
+
+    # DB configs
+    spring.datasource.url: vault:secrets/data/cluster/{{ .Release.Namespace }}/zea-2026-b02-nischay-ride-booking-ride-service/tenants/0/ganymede/nischayride/master#jdbc.url
+    spring.datasource.username: vault:secrets/data/cluster/{{ .Release.Namespace }}/zea-2026-b02-nischay-ride-booking-ride-service/tenants/0/ganymede/nischayride/master#username
+    spring.datasource.password: vault:secrets/data/cluster/{{ .Release.Namespace }}/zea-2026-b02-nischay-ride-booking-ride-service/tenants/0/ganymede/nischayride/master#password

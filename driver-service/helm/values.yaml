@@ -1,0 +1,58 @@
+nameOverride: "zea-2026-b02-nischay-ride-booking-driver-service"
+fullnameOverride: "zea-2026-b02-nischay-ride-booking-driver-service"
+clusterName: ride-booking
+
+hpa:
+  enabled: false
+
+replicaCount: 1
+
+image:
+  repository: 813361731051.dkr.ecr.ap-south-1.amazonaws.com
+  repositoryPath: zea-2026-b02-nischay-ride-booking-driver-service
+  pullPolicy: Always
+  tag: 0.0.1
+
+disablePropertiesConfigMap: true
+
+envProperties:
+  javaXms: 128M
+  javaXmx: 512M
+  APP_NAME: zea-2026-b02-nischay-ride-booking-driver-service
+  KINESIS_ACCESSKEY: vault:secrets/data/zone/common/logging#KINESIS_ACCESSKEY
+  KINESIS_SECRETKEY: vault:secrets/data/zone/common/logging#KINESIS_SECRETKEY
+  KINESIS_REGION: vault:secrets/data/zone/common/logging#KINESIS_REGION
+
+resources:
+  limits:
+    memory: 2Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
+
+serviceAccountName: zea-2026-b02-nischay-ride-booking-driver-service
+
+service:
+  targetPort: 8080
+  healthCheckPath: /actuator/health
+  livenessProbeInitialDelaySeconds: 60
+  readinessProbeInitialDelaySeconds: 60
+
+serviceMonitor:
+  enabled: true
+  monitors:
+    - name: micrometer
+      path: /actuator/metrics
+      port: http
+      scrapeTimeout: 10s
+      interval: 60s
+      matchLabels:
+        app.kubernetes.io/name: zea-2026-b02-nischay-ride-booking-driver-service
+        app: zea-2026-b02-nischay-ride-booking-driver-service
+
+olympusLabels:
+  olympusCluster: ccetest #he wrote ccetest
+  olympusClusterBU: DevWorld
+  olympusClusterTeam: devworld
+  olympusZone: aws-ow-mumbai
+  olympusZoneEnv: staging

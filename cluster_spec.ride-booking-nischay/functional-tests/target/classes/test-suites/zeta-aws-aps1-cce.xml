@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="CCESuite">
+    <listeners>
+        <listener class-name="in.zeta.cce.testngcommons.listeners.CCEPriorityReporter"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+    <test name="Samples">
+        <packages>
+            <package name="in.zeta.testngsamples.*" />
+        </packages>
+    </test>
+</suite>

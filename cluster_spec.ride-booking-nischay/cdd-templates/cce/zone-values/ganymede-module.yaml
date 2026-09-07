@@ -1,0 +1,35 @@
+global:
+  clusterName: {{ .Release.Namespace }}
+  clusterVersion: 0.0.1
+  moduleLabels:
+    module: {{ .Release.Namespace }}
+    version: 0.0.1
+
+resourceRequirements:
+  god:
+    ganymedeRelationalStore:
+      zea-2026-b02-nischay-ride-booking-ride-service-db:
+        appName: zea-2026-b02-nischay-ride-booking-ride-service
+        dbCode: nischayride
+        dbEngine: postgres
+      zea-2026-b02-nischay-ride-booking-driver-service-db:
+        appName: zea-2026-b02-nischay-ride-booking-driver-service
+        dbCode: nischaydrvr
+        dbEngine: postgres
+      zea-2026-b02-nischay-ride-booking-notification-service-db:
+        appName: zea-2026-b02-nischay-ride-booking-notification-service
+        dbCode: nischaynotif
+        dbEngine: postgres
+    ddl:
+      zea-2026-b02-nischay-ride-booking-ride-service-ddl:
+        dbCode: nischayride
+        dbEngine: postgres
+        script: ddl-dev-snapshot/zea-2026-b02-nischay-ride-booking-ride-service-ddl/V1.0.1/V1.0.1-SNAPSHOT.tar.gz
+      zea-2026-b02-nischay-ride-booking-driver-service-ddl:
+        dbCode: nischaydrvr
+        dbEngine: postgres
+        script: ddl-dev-snapshot/zea-2026-b02-nischay-ride-booking-driver-service-ddl/V1.0.1/V1.0.1-SNAPSHOT.tar.gz
+      zea-2026-b02-nischay-ride-booking-notification-service-ddl:
+        dbCode: nischaynotif
+        dbEngine: postgres
+        script: ddl-dev-snapshot/zea-2026-b02-nischay-ride-booking-notification-service-ddl/V1.0.1/V1.0.1-SNAPSHOT.tar.gz
